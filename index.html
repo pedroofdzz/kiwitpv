@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TPV Móvil - Kiwi Review</title>
+    
+    <!-- Configuración PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="image_5ba85e.jpg">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root { --primary: #0ea5e9; --success: #10b981; --danger: #f43f5e; --text-main: #f8fafc; --text-muted: #94a3b8; --bg-panel: rgba(15, 23, 42, 0.65); }
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 15px; color: var(--text-main); background: linear-gradient(-45deg, #0f172a, #1e1b4b, #064e3b, #0c4a6e); background-size: 400% 400%; animation: gradientBG 15s ease infinite; min-height: 100vh; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .grid-container { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        @media (min-width: 768px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: 1fr 1fr auto; } }
+        .panel { background: var(--bg-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
+        h2 { margin-top: 0; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        input { font-size: 16px; background: rgba(15, 23, 42, 0.8); color: white; }
+        input::placeholder { color: #64748b; }
+        input, button { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-sizing: border-box; outline: none; transition: all 0.3s; }
+        button { background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; border: none; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        button.btn-danger { background: linear-gradient(135deg, var(--danger), #be123c); }
+        button.btn-success { background: linear-gradient(135deg, var(--success), #059669); }
+        button:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
+        .btn-tpv { text-align: left; display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .badge-precio { background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 0.9em; border: 1px solid rgba(14, 165, 233, 0.3); }
+        .badge-agotado { background: #334155; color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 0.9em; }
+        .controles-cantidad button { width: 38px; height: 38px; padding: 0; margin: 0 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.2rem; }
+
+        /* TICKET FORZADO EN BLANCO */
+        #contenedor-ticket { display: flex; flex-direction: column; align-items: center; overflow-x: auto; }
+        .ticket-preview { background: #ffffff !important; padding: 25px; width: 320px; min-width: 320px; font-family: 'Courier New', Courier, monospace; color: #000000 !important; box-sizing: border-box; }
+        .ticket-header { text-align: center; margin-bottom: 20px; }
+        .logo-ticket { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px auto; display: block; border: 2px dashed #000; padding: 2px; }
+        .ticket-header input { text-align: center; border: none; background: transparent; font-family: inherit; margin-bottom: 2px; width: 100%; color: #000; padding: 2px; }
+        .ticket-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; }
+        .ticket-total { font-size: 1.3rem; font-weight: 900; text-align: right; border-top: 2px dashed #000; margin-top: 15px; padding-top: 15px; }
+        .btn-formatear { background: transparent; border: 1px solid var(--danger); color: var(--danger); margin-top: 25px; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="grid-container">
+        <!-- INVENTARIO -->
+        <div class="panel">
+            <h2>📦 Gestión de Inventario</h2>
+            <input type="text" id="nuevo-nombre" placeholder="✨ Nombre del artículo">
+            <input type="number" id="nuevo-precio" placeholder="💶 Precio (€)" step="0.01" inputmode="decimal">
+            <input type="number" id="nuevo-stock" placeholder="📦 Cantidad en stock" inputmode="numeric">
+            <button onclick="agregarInventario()">➕ Añadir al Inventario</button>
+            <h2 style="margin-top: 30px;">📋 Inventario Actual</h2>
+            <div id="lista-inventario"></div>
+            <button onclick="resetearSistema()" class="btn-formatear">⚠️ Formatear Todo el Sistema</button>
+        </div>
+
+        <!-- TPV -->
+        <div class="panel">
+            <h2>🛒 TPV en vivo</h2>
+            <div id="lista-tpv"></div>
+        </div>
+
+        <!-- TICKET -->
+        <div class="panel" id="contenedor-ticket">
+            <h2 style="width: 100%;">🧾 Vista previa del Ticket</h2>
+            <div id="zona-ticket" class="ticket-preview">
+                <div class="ticket-header">
+                    <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
+                    <input type="text" id="ticket-empresa" value="KIWI REVIEW" style="font-weight: 900; font-size: 1.5rem;">
+                    <input type="text" id="ticket-direccion" value="Piedras Blancas, Asturias">
+                    <div style="font-size: 0.9rem; margin-top: 8px; color: #444;">Ticket: #<span id="ticket-id">0001</span></div>
+                    <div style="font-size: 0.9rem; color: #444;" id="ticket-fecha"></div>
+                </div>
+                
+                <div style="border-bottom: 2px dashed #000; margin-bottom: 15px;"></div>
+                <div id="ticket-items"></div>
+                <div class="ticket-total">TOTAL: <span id="ticket-total-precio">0.00</span>€</div>
+                
+                <!-- CÓDIGO QR GENERADO -->
+                <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
+                    <div id="codigo-qr"></div>
+                    <div style="text-align: center; font-size: 0.85rem; font-weight: bold; margin-top: 8px;">¡Síguenos en Instagram!</div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; font-weight: bold;">¡Gracias por confiar en nosotros!</div>
+            </div>
+            
+            <button onclick="descargarTicketImagen()" class="btn-success" style="margin-top: 25px; font-size: 1.1rem; padding: 16px;">📸 Descargar Ticket Generado</button>
+        </div>
+    </div>
+
+    <script>
+        // Lógica de datos
+        let inventario = JSON.parse(localStorage.getItem('kiwi_inventario')) || [];
+        let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
+        let carrito = []; 
+
+        function guardarDatos() {
+            localStorage.setItem('kiwi_inventario', JSON.stringify(inventario));
+            localStorage.setItem('kiwi_ticket', numeroTicket.toString());
+        }
+
+        function resetearSistema() {
+            if(confirm("⚠️ ¿Estás completamente seguro de que quieres formatear la memoria?")) {
+                localStorage.removeItem('kiwi_inventario');
+                localStorage.removeItem('kiwi_ticket');
+                inventario = []; carrito = []; numeroTicket = 1;
+                actualizarUI();
+            }
+        }
+
+        function agregarInventario() {
+            const n = document.getElementById('nuevo-nombre').value, p = parseFloat(document.getElementById('nuevo-precio').value), s = parseInt(document.getElementById('nuevo-stock').value);
+            if (!n || isNaN(p) || isNaN(s)) return alert("Rellena todos los campos.");
+            inventario.push({ id: inventario.length ? Math.max(...inventario.map(i => i.id)) + 1 : 1, nombre: n, precio: p, stock: s });
+            document.getElementById('nuevo-nombre').value = ''; document.getElementById('nuevo-precio').value = ''; document.getElementById('nuevo-stock').value = '';
+            guardarDatos(); actualizarUI();
+        }
+
+        function eliminarDelInventario(id) {
+            if(confirm("¿Seguro que deseas eliminar el artículo?")) {
+                inventario = inventario.filter(prod => prod.id !== id);
+                carrito = carrito.filter(item => item.id !== id);
+                guardarDatos(); actualizarUI();
+            }
+        }
+
+        function agregarAlCarrito(id) {
+            const prod = inventario.find(p => p.id === id);
+            if (prod && prod.stock > 0) {
+                prod.stock--;
+                const item = carrito.find(i => i.id === id);
+                if (item) item.cantidad++; else carrito.push({ ...prod, cantidad: 1 });
+                guardarDatos(); actualizarUI();
+            }
+        }
+
+        function quitarDelCarrito(id) {
+            const item = carrito.find(i => i.id === id), prod = inventario.find(p => p.id === id);
+            if (item) {
+                if(prod) prod.stock++;
+                item.cantidad--;
+                if (item.cantidad === 0) carrito = carrito.filter(i => i.id !== id);
+                guardarDatos(); actualizarUI();
+            }
+        }
+
+        function actualizarUI() {
+            const divInv = document.getElementById('lista-inventario'); divInv.innerHTML = '';
+            inventario.forEach(prod => { divInv.innerHTML += `<div class="item-lista"><div style="flex: 1;"><strong style="color: var(--primary);">${prod.nombre}</strong><br><span style="color: var(--text-muted); font-size: 0.85rem;">${prod.precio.toFixed(2)}€ | 📦 Stock: ${prod.stock}</span></div><button onclick="eliminarDelInventario(${prod.id})" class="btn-danger" style="width: auto; padding: 10px 14px; margin: 0; border-radius: 10px;">🗑️</button></div>`; });
+
+            const divTPV = document.getElementById('lista-tpv'); divTPV.innerHTML = '';
+            inventario.forEach(prod => { const ag = prod.stock === 0; divTPV.innerHTML += `<button class="btn-tpv" onclick="agregarAlCarrito(${prod.id})" ${ag ? 'disabled' : ''}><span style="font-weight: bold; font-size: 1.1rem;">${prod.nombre}</span><span class="${ag ? 'badge-agotado' : 'badge-precio'}">${ag ? 'AGOTADO' : prod.precio.toFixed(2) + '€'}</span></button>`; });
+
+            const divTick = document.getElementById('ticket-items'); divTick.innerHTML = ''; let t = 0;
+            carrito.forEach(item => { const sub = item.precio * item.cantidad; t += sub; divTick.innerHTML += `<div class="ticket-line" style="margin-top: 12px;"><span>${item.cantidad}x ${item.nombre}</span><span>${sub.toFixed(2)}€</span></div><div class="controles-cantidad" style="text-align: right; margin-bottom: 12px;" data-html2canvas-ignore><button onclick="quitarDelCarrito(${item.id})" class="btn-danger" style="background:var(--danger);">-</button><button onclick="agregarAlCarrito(${item.id})" style="background: var(--primary);">+</button></div>`; });
+
+            document.getElementById('ticket-total-precio').innerText = t.toFixed(2);
+            document.getElementById('ticket-id').innerText = String(numeroTicket).padStart(4, '0');
+            const d = new Date(); document.getElementById('ticket-fecha').innerText = `${d.toLocaleDateString()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function descargarTicketImagen() {
+            if (carrito.length === 0) return alert("⚠️ Añade artículos.");
+            const btn = document.querySelector('button[onclick="descargarTicketImagen()"]');
+            btn.innerText = "⏳ Procesando..."; btn.disabled = true;
+
+            html2canvas(document.getElementById('zona-ticket'), { backgroundColor: "#ffffff", scale: 2, useCORS: true }).then(canvas => {
+                const a = document.createElement("a"); a.href = canvas.toDataURL("image/png"); a.download = `Ticket_${String(numeroTicket).padStart(4, '0')}.png`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                carrito = []; numeroTicket++; guardarDatos(); actualizarUI();
+                btn.innerText = "✅ ¡Listo! 📸 Siguiente"; setTimeout(() => { btn.innerText = "📸 Descargar Ticket Generado"; btn.disabled = false; }, 2000);
+            });
+        }
+
+        // 1. Inicializar Interfaz
+        actualizarUI();
+
+        // 2. Generar el QR apuntando a Instagram
+        new QRCode(document.getElementById("codigo-qr"), {
+            text: "https://www.instagram.com/kiwi__review/?hl=es", // ENLACE ACTUALIZADO
+            width: 100,
+            height: 100,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.L
+        });
+
+        // 3. Registrar el "Motor" de la App Instalable (Service Worker)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('✅ App lista para funcionar sin internet.'))
+                    .catch(err => console.error('❌ Error en App', err));
+            });
+        }
+    </script>
+</body>
+</html>
