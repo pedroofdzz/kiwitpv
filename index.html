@@ -74,7 +74,6 @@
                 <div class="ticket-header">
                     <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
                     
-                    <!-- AÑADIMOS EL EVENTO ONINPUT PARA QUE SE GUARDE AL ESCRIBIR -->
                     <input type="text" id="ticket-empresa" oninput="guardarTextosTicket()" style="font-weight: 900; font-size: 1.5rem;">
                     <input type="text" id="ticket-direccion" oninput="guardarTextosTicket()">
                     
@@ -100,16 +99,25 @@
     </div>
 
     <script>
+        // --- SISTEMA DE BLOQUEO BÁSICO ---
+        const claveCorrecta = "Kiwi2026"; // Cambia esto por tu contraseña ideal
+        const intento = prompt("🔒 Área restringida. Introduce la contraseña para acceder al TPV de Kiwi Review:");
+
+        if (intento !== claveCorrecta) {
+            // Borra todo el HTML y detiene la aplicación
+            document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20vh; font-family:sans-serif;'>⛔ Acceso Denegado</h1>";
+            throw new Error("Acceso bloqueado por contraseña incorrecta.");
+        }
+        // ---------------------------------
+
         // Lógica de datos
         let inventario = JSON.parse(localStorage.getItem('kiwi_inventario')) || [];
         let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
         let carrito = []; 
 
-        // RECUPERAR TEXTOS DEL TICKET (O PONER LOS DE POR DEFECTO)
         document.getElementById('ticket-empresa').value = localStorage.getItem('kiwi_texto_empresa') || "KIWI REVIEW";
         document.getElementById('ticket-direccion').value = localStorage.getItem('kiwi_texto_direccion') || "Un toque, cinco estrellas";
 
-        // FUNCIÓN NUEVA: GUARDA LOS TEXTOS CADA VEZ QUE ESCRIBES
         function guardarTextosTicket() {
             localStorage.setItem('kiwi_texto_empresa', document.getElementById('ticket-empresa').value);
             localStorage.setItem('kiwi_texto_direccion', document.getElementById('ticket-direccion').value);
