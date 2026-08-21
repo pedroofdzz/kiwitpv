@@ -73,8 +73,11 @@
             <div id="zona-ticket" class="ticket-preview">
                 <div class="ticket-header">
                     <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
-                    <input type="text" id="ticket-empresa" value="KIWI REVIEW" style="font-weight: 900; font-size: 1.5rem;">
-                    <input type="text" id="ticket-direccion" value="Piedras Blancas, Asturias">
+                    
+                    <!-- AÑADIMOS EL EVENTO ONINPUT PARA QUE SE GUARDE AL ESCRIBIR -->
+                    <input type="text" id="ticket-empresa" oninput="guardarTextosTicket()" style="font-weight: 900; font-size: 1.5rem;">
+                    <input type="text" id="ticket-direccion" oninput="guardarTextosTicket()">
+                    
                     <div style="font-size: 0.9rem; margin-top: 8px; color: #444;">Ticket: #<span id="ticket-id">0001</span></div>
                     <div style="font-size: 0.9rem; color: #444;" id="ticket-fecha"></div>
                 </div>
@@ -102,13 +105,23 @@
         let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
         let carrito = []; 
 
+        // RECUPERAR TEXTOS DEL TICKET (O PONER LOS DE POR DEFECTO)
+        document.getElementById('ticket-empresa').value = localStorage.getItem('kiwi_texto_empresa') || "KIWI REVIEW";
+        document.getElementById('ticket-direccion').value = localStorage.getItem('kiwi_texto_direccion') || "Un toque, cinco estrellas";
+
+        // FUNCIÓN NUEVA: GUARDA LOS TEXTOS CADA VEZ QUE ESCRIBES
+        function guardarTextosTicket() {
+            localStorage.setItem('kiwi_texto_empresa', document.getElementById('ticket-empresa').value);
+            localStorage.setItem('kiwi_texto_direccion', document.getElementById('ticket-direccion').value);
+        }
+
         function guardarDatos() {
             localStorage.setItem('kiwi_inventario', JSON.stringify(inventario));
             localStorage.setItem('kiwi_ticket', numeroTicket.toString());
         }
 
         function resetearSistema() {
-            if(confirm("⚠️ ¿Estás completamente seguro de que quieres formatear la memoria?")) {
+            if(confirm("⚠️ ¿Estás completamente seguro de que quieres formatear la memoria de inventario? (No borrará el nombre ni el eslogan de tu ticket)")) {
                 localStorage.removeItem('kiwi_inventario');
                 localStorage.removeItem('kiwi_ticket');
                 inventario = []; carrito = []; numeroTicket = 1;
@@ -185,7 +198,7 @@
 
         // 2. Generar el QR apuntando a Instagram
         new QRCode(document.getElementById("codigo-qr"), {
-            text: "https://www.instagram.com/kiwi__review/?hl=es", // ENLACE ACTUALIZADO
+            text: "https://www.instagram.com/kiwi__review/?hl=es", 
             width: 100,
             height: 100,
             colorDark : "#000000",
