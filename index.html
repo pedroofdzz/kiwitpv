@@ -51,7 +51,6 @@
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #0f172a; display: flex; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000; }
         .nav-item { flex: 1; padding: 12px 0; text-align: center; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 3px; }
         .nav-item.active { color: var(--primary); background: rgba(255,255,255,0.05); border-top: 2px solid var(--primary); }
-        .nav-item i { font-size: 1.1rem; }
         
         .vista { display: none; }
         .vista.active { display: block; }
@@ -59,10 +58,31 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .stat-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: center; }
         .stat-valor { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+
+        /* ESTILOS DEL POP-UP Y EL BOTÓN DE DESCARGA */
+        .modal-fondo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-fondo.activo { display: flex; }
+        .modal-mensaje { color: white; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; text-align: center; }
+        #imagen-ticket-generado { max-width: 85%; max-height: 55vh; border-radius: 5px; box-shadow: 0 0 20px rgba(255,255,255,0.2); margin-bottom: 20px; }
+        
+        .btn-descargar-enlace { display: block; background: linear-gradient(135deg, var(--success), #059669); color: white; text-decoration: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; text-align: center; width: 80%; box-sizing: border-box; }
+        .btn-cerrar-modal { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 80%; padding: 12px; border-radius: 12px; }
     </style>
 </head>
 <body>
 
+    <!-- POP-UP CON EL BOTÓN DE DESCARGA DIRECTO -->
+    <div id="modal-ticket" class="modal-fondo">
+        <div class="modal-mensaje">✅ Venta Registrada con Éxito</div>
+        <img id="imagen-ticket-generado" src="" alt="Tu Ticket Generado">
+        
+        <!-- ESTE ES EL BOTÓN MÁGICO QUE FORZA LA DESCARGA EN EL MÓVIL -->
+        <a id="boton-descargar-real" href="#" download="Ticket.png" class="btn-descargar-enlace">📥 Descargar Ticket</a>
+        
+        <button class="btn-cerrar-modal" onclick="cerrarModalTicket()">✖️ Cerrar y continuar</button>
+    </div>
+
+    <!-- VISTA 1: TPV -->
     <div id="vista-tpv" class="vista active">
         <div class="panel">
             <h2>🛒 Punto de Venta</h2>
@@ -94,6 +114,7 @@
         </div>
     </div>
 
+    <!-- VISTA 2: INVENTARIO -->
     <div id="vista-inventario" class="vista">
         <div class="panel">
             <h2>📦 Añadir Producto</h2>
@@ -111,6 +132,7 @@
         </div>
     </div>
 
+    <!-- VISTA 3: ESTADÍSTICAS -->
     <div id="vista-estadisticas" class="vista">
         <div class="panel">
             <h2>📊 Resumen de Negocio</h2>
@@ -134,16 +156,11 @@
         </div>
     </div>
 
+    <!-- MENÚ -->
     <div class="nav-bar">
-        <div class="nav-item active" id="nav-tpv" onclick="cambiarVista('tpv')">
-            <span>🛒</span> TPV
-        </div>
-        <div class="nav-item" id="nav-inventario" onclick="cambiarVista('inventario')">
-            <span>📦</span> Inventario
-        </div>
-        <div class="nav-item" id="nav-estadisticas" onclick="cambiarVista('estadisticas')">
-            <span>📊</span> Ventas
-        </div>
+        <div class="nav-item active" id="nav-tpv" onclick="cambiarVista('tpv')">🛒 TPV</div>
+        <div class="nav-item" id="nav-inventario" onclick="cambiarVista('inventario')">📦 Inventario</div>
+        <div class="nav-item" id="nav-estadisticas" onclick="cambiarVista('estadisticas')">📊 Ventas</div>
     </div>
 
     <script>
@@ -271,60 +288,46 @@
             const d = new Date(); document.getElementById('ticket-fecha').innerText = `${d.toLocaleDateString()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         }
 
-        // --- EL NUEVO MOTOR DE DESCARGA PARA MÓVILES ---
         function finalizarVenta() {
             if (carrito.length === 0) return alert("⚠️ El ticket está vacío.");
             
             const btn = document.querySelector('button[onclick="finalizarVenta()"]');
             btn.innerText = "⏳ Procesando..."; btn.disabled = true;
 
+            // 1. Guardar la venta
             let totalVenta = 0;
             carrito.forEach(i => totalVenta += (i.precio * i.cantidad));
-            
             ventasHistorial.push({ id: numeroTicket, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), total: totalVenta });
 
+            // 2. Dibujar la imagen del ticket
             html2canvas(document.getElementById('zona-ticket'), { backgroundColor: "#ffffff", scale: 2, useCORS: true }).then(canvas => {
-                const nombreArchivo = `Ticket_${String(numeroTicket).padStart(4, '0')}.png`;
+                const imgDataUrl = canvas.toDataURL("image/png");
+                const nombreArchivo = `Ticket_KiwiReview_${String(numeroTicket).padStart(4, '0')}.png`;
                 
-                // Convertimos la imagen para que el móvil la entienda
-                canvas.toBlob(function(blob) {
-                    const archivo = new File([blob], nombreArchivo, { type: 'image/png' });
+                // 3. Preparar el Pop-Up
+                const modal = document.getElementById('modal-ticket');
+                const imagenModal = document.getElementById('imagen-ticket-generado');
+                const botonDescargar = document.getElementById('boton-descargar-real');
+                
+                // Le pasamos la imagen generada tanto a la foto visible como al enlace del botón
+                imagenModal.src = imgDataUrl;
+                botonDescargar.href = imgDataUrl;
+                botonDescargar.download = nombreArchivo;
+                
+                // Mostramos la ventana
+                modal.classList.add('activo');
 
-                    // Si el móvil soporta compartir de forma nativa (Menú iOS/Android)
-                    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-                        navigator.share({
-                            files: [archivo],
-                            title: 'Ticket Kiwi Review',
-                            text: 'Aquí tienes el ticket de tu compra.'
-                        }).then(() => {
-                            completarInterfazVenta(btn);
-                        }).catch((error) => {
-                            // Si el usuario cancela o falla, hacemos la descarga clásica
-                            ejecutarDescargaClasica(canvas.toDataURL("image/png"), nombreArchivo, btn);
-                        });
-                    } else {
-                        // Si es ordenador o no soporta compartir nativo
-                        ejecutarDescargaClasica(canvas.toDataURL("image/png"), nombreArchivo, btn);
-                    }
-                }, 'image/png');
+                // 4. Limpiar el carrito de fondo
+                carrito = []; numeroTicket++; 
+                guardarDatos(); actualizarUI();
+                
+                btn.innerText = "💶 Cobrar y Generar Ticket"; 
+                btn.disabled = false;
             });
         }
 
-        function ejecutarDescargaClasica(dataUrl, nombre, btn) {
-            const a = document.createElement("a"); 
-            a.href = dataUrl; 
-            a.download = nombre;
-            document.body.appendChild(a); 
-            a.click(); 
-            document.body.removeChild(a);
-            completarInterfazVenta(btn);
-        }
-
-        function completarInterfazVenta(btn) {
-            carrito = []; numeroTicket++; 
-            guardarDatos(); actualizarUI();
-            btn.innerText = "✅ Venta Registrada"; 
-            setTimeout(() => { btn.innerText = "💶 Cobrar y Generar Ticket"; btn.disabled = false; }, 2000);
+        function cerrarModalTicket() {
+            document.getElementById('modal-ticket').classList.remove('activo');
         }
 
         function actualizarEstadisticas() {
