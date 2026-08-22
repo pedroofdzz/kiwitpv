@@ -40,9 +40,10 @@
         .panel { background: var(--bg-panel); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; margin: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: background 0.3s ease; }
         h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;}
         
-        input { font-size: 16px; background: rgba(0, 0, 0, 0.5); color: white; }
+        input, select { font-size: 16px; background: rgba(0, 0, 0, 0.5); color: white; }
         input[type="file"] { padding: 10px; background: rgba(255,255,255,0.05); border: 1px dashed var(--primary); }
-        input, button { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-sizing: border-box; outline: none; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-sizing: border-box; outline: none; }
+        select option { background: #0f172a; color: white; }
         
         button { background: linear-gradient(135deg, var(--primary), rgba(255,255,255,0.2)); color: white; border: none; cursor: pointer; font-weight: bold; }
         button.btn-danger { background: linear-gradient(135deg, var(--danger), #be123c); }
@@ -75,9 +76,8 @@
             flex-direction: column; 
         }
         
-        /* LOGO MÁS GRANDE */
         .logo-ticket { 
-            width: 130px; /* Aumentado a 130px para la máquina de impresión */
+            width: 130px;
             height: 130px; 
             border-radius: 50%; 
             object-fit: cover; 
@@ -175,16 +175,27 @@
         <div class="panel" id="contenedor-ticket">
             <h2 style="width: 100%;">🧾 Ticket en Curso</h2>
             
+            <!-- NUEVO: SELECTOR DE CLIENTES CRM EN EL TPV -->
+            <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 5px;">Asignar a cliente:</label>
+            <select id="tpv-cliente" onchange="actualizarClienteTicket()">
+                <option value="">👤 Consumidor Final (Sin Cliente)</option>
+            </select>
+            
             <div id="zona-ticket" class="ticket-preview">
                 <div class="ticket-header" style="text-align: center; margin-bottom: 20px;">
                     <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
                     <input type="text" id="ticket-empresa" onchange="guardarTextosTicket()" style="font-weight: 900; font-size: 1.3rem;">
                     <input type="text" id="ticket-direccion" onchange="guardarTextosTicket()">
+                    
                     <div style="font-size: 0.9rem; margin-top: 8px; color: #444;">Ticket: #<span id="ticket-id">0001</span></div>
                     <div style="font-size: 0.9rem; color: #444;" id="ticket-fecha"></div>
+                    
+                    <!-- NUEVO: ESPACIO EN EL TICKET PARA EL NOMBRE DEL CLIENTE -->
+                    <div style="font-size: 0.9rem; margin-top: 8px; padding-bottom: 8px; color: #444; border-bottom: 1px dashed #444;">
+                        Cliente: <strong id="ticket-cliente-visual">Consumidor Final</strong>
+                    </div>
                 </div>
                 
-                <div style="border-bottom: 2px dashed #000; margin-bottom: 15px;"></div>
                 <div id="ticket-items"></div>
                 <div class="ticket-total">TOTAL: <span id="ticket-total-precio">0.00</span>€</div>
                 
@@ -195,6 +206,20 @@
             </div>
             
             <button onclick="finalizarVenta()" class="btn-success" style="margin-top: 20px; font-size: 1.1rem; padding: 15px;">💶 Cobrar y Generar Ticket</button>
+        </div>
+    </div>
+
+    <!-- NUEVA VISTA 4: MÓDULO CRM (CLIENTES) -->
+    <div id="vista-clientes" class="vista">
+        <div class="panel">
+            <h2>👥 Registrar Nuevo Cliente</h2>
+            <input type="text" id="nuevo-cliente-nombre" placeholder="🏢 Nombre del Local (Ej: El Escondite)">
+            <input type="text" id="nuevo-cliente-contacto" placeholder="👤 Persona de contacto (Opcional)">
+            <button onclick="agregarCliente()">➕ Añadir a la Cartera</button>
+        </div>
+        <div class="panel">
+            <h2>📓 Cartera de Clientes</h2>
+            <div id="lista-clientes"></div>
         </div>
     </div>
 
@@ -237,8 +262,10 @@
         </div>
     </div>
 
+    <!-- MENÚ INFERIOR ACTUALIZADO CON 4 PESTAÑAS -->
     <div class="nav-bar">
         <div class="nav-item active" id="nav-tpv" onclick="cambiarVista('tpv')"><span>🛒</span> TPV</div>
+        <div class="nav-item" id="nav-clientes" onclick="cambiarVista('clientes')"><span>👥</span> Clientes</div>
         <div class="nav-item" id="nav-inventario" onclick="cambiarVista('inventario')"><span>📦</span> Inventario</div>
         <div class="nav-item" id="nav-estadisticas" onclick="cambiarVista('estadisticas')"><span>📊</span> Ventas</div>
     </div>
@@ -286,6 +313,7 @@
 
         let inventario = JSON.parse(localStorage.getItem('kiwi_inventario')) || [];
         let ventasHistorial = JSON.parse(localStorage.getItem('kiwi_ventas_historial')) || [];
+        let clientesCRM = JSON.parse(localStorage.getItem('kiwi_clientes')) || []; // NUEVA BASE DE DATOS CRM
         let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
         let carrito = []; 
         let miGrafica = null;
@@ -309,7 +337,61 @@
             localStorage.setItem('kiwi_inventario', JSON.stringify(inventario));
             localStorage.setItem('kiwi_ticket', numeroTicket.toString());
             localStorage.setItem('kiwi_ventas_historial', JSON.stringify(ventasHistorial));
+            localStorage.setItem('kiwi_clientes', JSON.stringify(clientesCRM)); // GUARDAR CLIENTES
         }
+
+        // --- SISTEMA CRM (NUEVO) ---
+        function agregarCliente() {
+            const nombreLocal = document.getElementById('nuevo-cliente-nombre').value;
+            const contactoLocal = document.getElementById('nuevo-cliente-contacto').value;
+            
+            if (!nombreLocal) return alert("⚠️ El nombre del local es obligatorio.");
+            
+            clientesCRM.push({ id: Date.now(), nombre: nombreLocal, contacto: contactoLocal });
+            document.getElementById('nuevo-cliente-nombre').value = '';
+            document.getElementById('nuevo-cliente-contacto').value = '';
+            
+            guardarDatos();
+            actualizarUIClientes();
+        }
+
+        function eliminarCliente(id) {
+            if(confirm("¿Seguro que quieres borrar este cliente de tu cartera?")) {
+                clientesCRM = clientesCRM.filter(c => c.id !== id);
+                guardarDatos();
+                actualizarUIClientes();
+            }
+        }
+
+        function actualizarUIClientes() {
+            // 1. Actualizar lista visual en pestaña Clientes
+            const divLista = document.getElementById('lista-clientes');
+            divLista.innerHTML = '';
+            clientesCRM.forEach(c => {
+                const infoContacto = c.contacto ? `<br><span style="font-size:0.8rem; color:var(--text-muted);">👤 Contacto: ${c.contacto}</span>` : '';
+                divLista.innerHTML += `
+                <div class="item-lista">
+                    <div><strong style="color:var(--primary); font-size:1.1rem;">${c.nombre}</strong>${infoContacto}</div>
+                    <button onclick="eliminarCliente(${c.id})" class="btn-danger" style="width:auto; padding:10px 14px; margin:0;">🗑️</button>
+                </div>`;
+            });
+
+            // 2. Actualizar desplegable en el TPV
+            const selectTPV = document.getElementById('tpv-cliente');
+            const valorActual = selectTPV.value;
+            selectTPV.innerHTML = '<option value="">👤 Consumidor Final (Sin Cliente)</option>';
+            clientesCRM.forEach(c => {
+                selectTPV.innerHTML += `<option value="${c.nombre}">🏢 ${c.nombre}</option>`;
+            });
+            // Mantener seleccionado si existía
+            if([...selectTPV.options].some(o => o.value === valorActual)) selectTPV.value = valorActual;
+        }
+
+        function actualizarClienteTicket() {
+            const nombreSeleccionado = document.getElementById('tpv-cliente').value;
+            document.getElementById('ticket-cliente-visual').innerText = nombreSeleccionado || "Consumidor Final";
+        }
+        // ---------------------------
 
         function agregarInventario() {
             const inputFoto = document.getElementById('nuevo-foto');
@@ -420,7 +502,10 @@
             btn.innerText = "⏳ Generando..."; btn.disabled = true;
 
             let totalVenta = 0; carrito.forEach(i => totalVenta += (i.precio * i.cantidad));
-            ventasHistorial.push({ id: numeroTicket, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), total: totalVenta });
+            
+            // Guardar venta (Ahora también guarda el cliente asociado si lo hay)
+            const nombreCliente = document.getElementById('tpv-cliente').value || "Consumidor Final";
+            ventasHistorial.push({ id: numeroTicket, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), total: totalVenta, cliente: nombreCliente });
 
             html2canvas(document.getElementById('zona-ticket'), { backgroundColor: "#ffffff", scale: 2, useCORS: true }).then(canvas => {
                 const imgDataUrl = canvas.toDataURL("image/png");
@@ -430,7 +515,11 @@
                 reproducirSonidoVenta();
                 confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
 
-                carrito = []; numeroTicket++; guardarDatos(); actualizarUI();
+                carrito = []; numeroTicket++; 
+                document.getElementById('tpv-cliente').value = ""; // Reiniciar selector de cliente
+                actualizarClienteTicket();
+                
+                guardarDatos(); actualizarUI();
                 btn.innerText = "💶 Cobrar y Generar Ticket"; btn.disabled = false;
             });
         }
@@ -440,7 +529,10 @@
             [...ventasHistorial].reverse().forEach(venta => {
                 ingresosTotales += venta.total;
                 if(ventasPorDia[venta.fecha]) ventasPorDia[venta.fecha] += venta.total; else ventasPorDia[venta.fecha] = venta.total;
-                listaDiv.innerHTML += `<div class="item-lista"><div><strong style="color:var(--text-main);">Ticket #${String(venta.id).padStart(4, '0')}</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">${venta.fecha} a las ${venta.hora}</span></div><div style="font-size:1.1rem; font-weight:bold; color:var(--success);">${venta.total.toFixed(2)}€</div></div>`;
+                
+                const badgeCliente = venta.cliente !== "Consumidor Final" ? `<span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:5px; font-size:0.75rem; color:#fff;">🏢 ${venta.cliente}</span>` : '';
+                
+                listaDiv.innerHTML += `<div class="item-lista"><div><strong style="color:var(--text-main);">Ticket #${String(venta.id).padStart(4, '0')}</strong> ${badgeCliente}<br><span style="font-size:0.8rem; color:var(--text-muted);">${venta.fecha} a las ${venta.hora}</span></div><div style="font-size:1.1rem; font-weight:bold; color:var(--success);">${venta.total.toFixed(2)}€</div></div>`;
             });
             if(ventasHistorial.length === 0) listaDiv.innerHTML = '<p style="text-align:center; color:#94a3b8;">Aún no hay ventas.</p>';
             document.getElementById('stat-ingresos').innerText = ingresosTotales.toFixed(2) + '€'; document.getElementById('stat-tickets').innerText = ventasHistorial.length;
@@ -464,7 +556,9 @@
             });
         }
 
+        // Inicializar
         actualizarUI();
+        actualizarUIClientes();
         new QRCode(document.getElementById("codigo-qr"), { text: "https://www.instagram.com/kiwi__review/?hl=es", width: 90, height: 90, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
     </script>
 </body>
