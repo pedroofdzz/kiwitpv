@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        :root { --primary: #0ea5e9; --success: #10b981; --danger: #f43f5e; --text-main: #f8fafc; --text-muted: #94a3b8; --bg-panel: rgba(15, 23, 42, 0.85); }
+        :root { --primary: #0ea5e9; --success: #10b981; --danger: #f43f5e; --warning: #f59e0b; --text-main: #f8fafc; --text-muted: #94a3b8; --bg-panel: rgba(15, 23, 42, 0.85); }
         
         body { font-family: system-ui, sans-serif; margin: 0; padding: 0; color: var(--text-main); background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0c4a6e); background-size: 200% 200%; animation: gradientBG 25s ease infinite; min-height: 100vh; padding-bottom: 70px; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -31,13 +31,14 @@
         button.btn-success { background: linear-gradient(135deg, var(--success), #059669); }
         button:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; opacity: 0.5; }
         
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
         .grid-tpv { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-        .card-prod { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
+        .card-prod { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
         .card-prod img { width: 100%; height: 85px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #1e293b; }
         .card-prod .nombre { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; height: 35px; overflow: hidden; line-height: 1.2; }
         .badge-precio { background: var(--primary); color: white; padding: 4px; border-radius: 6px; font-size: 0.85em; width: 100%; box-sizing: border-box; }
+        .badge-oferta { background: var(--warning); color: #fff; position: absolute; top: 5px; right: 5px; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         
         .controles-cantidad button { width: 35px; height: 35px; padding: 0; margin: 0 4px; border-radius: 8px; font-size: 1.1rem; }
 
@@ -59,26 +60,26 @@
         .stat-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: center; }
         .stat-valor { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
 
-        .modal-fondo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-fondo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box;}
         .modal-fondo.activo { display: flex; }
         .modal-mensaje { color: var(--success); margin-bottom: 5px; font-size: 1.4rem; font-weight: bold; text-align: center; }
         .modal-instruccion { color: white; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; font-size: 0.9rem; text-align: center; animation: parpadeo 2s infinite; }
         @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
         
-        #imagen-ticket-generado { max-width: 90%; max-height: 60vh; border-radius: 5px; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4); margin-bottom: 25px; border: 2px solid var(--primary); pointer-events: auto; user-select: none; -webkit-touch-callout: default; }
-        
-        .btn-cerrar-modal { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 80%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
+        #imagen-ticket-generado { max-width: 100%; max-height: 60vh; border-radius: 5px; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4); margin-bottom: 25px; border: 2px solid var(--primary); pointer-events: auto; user-select: none; -webkit-touch-callout: default; }
+        .btn-cerrar-modal { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
 
-        /* NUEVO: ESTILOS PANTALLA DE BLOQUEO DE SEGURIDAD */
         #pantalla-bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .caja-login { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 350px; text-align: center; }
         .caja-login img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px; }
         #error-clave { color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; }
+        
+        .caja-edicion { background: var(--bg-panel); padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: left; border: 1px solid rgba(255,255,255,0.2); }
+        .caja-edicion label { font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 5px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE BLOQUEO INICIAL -->
     <div id="pantalla-bloqueo">
         <div class="caja-login">
             <img src="image_5ba85e.jpg" alt="Kiwi Logo">
@@ -89,7 +90,36 @@
         </div>
     </div>
 
-    <!-- POP-UP DEL TICKET -->
+    <!-- MODAL PARA EDITAR PRODUCTO -->
+    <div id="modal-edicion" class="modal-fondo">
+        <div class="caja-edicion">
+            <h2 style="margin-bottom: 15px;">✏️ Editar Producto</h2>
+            <input type="hidden" id="edit-id">
+            
+            <label>Nombre del producto:</label>
+            <input type="text" id="edit-nombre">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Precio Base (€):</label>
+                    <input type="number" id="edit-precio" step="0.01" inputmode="decimal">
+                </div>
+                <div>
+                    <label>Stock actual:</label>
+                    <input type="number" id="edit-stock" inputmode="numeric">
+                </div>
+            </div>
+
+            <label>Descuento / Oferta (%):</label>
+            <input type="number" id="edit-descuento" placeholder="Ej: 15 para un 15%" min="0" max="100" inputmode="numeric">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-danger" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);" onclick="cerrarEdicion()">Cancelar</button>
+                <button class="btn-success" onclick="guardarEdicion()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-ticket" class="modal-fondo">
         <div class="modal-mensaje">✅ ¡Venta Registrada!</div>
         <div class="modal-instruccion">👆 Mantén pulsado el ticket para guardarlo</div>
@@ -132,18 +162,17 @@
     <!-- VISTA 2: INVENTARIO -->
     <div id="vista-inventario" class="vista">
         <div class="panel">
-            <h2>📦 Añadir Producto</h2>
+            <h2>📦 Añadir Nuevo Producto</h2>
             <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Foto del producto:</label>
             <input type="file" id="nuevo-foto" accept="image/*">
             <input type="text" id="nuevo-nombre" placeholder="✨ Nombre (Ej: Cartel QR + NFC)">
-            <input type="number" id="nuevo-precio" placeholder="💶 Precio (€)" step="0.01" inputmode="decimal">
-            <input type="number" id="nuevo-stock" placeholder="📦 Cantidad en stock" inputmode="numeric">
+            <input type="number" id="nuevo-precio" placeholder="💶 Precio Base (€)" step="0.01" inputmode="decimal">
+            <input type="number" id="nuevo-stock" placeholder="📦 Cantidad inicial" inputmode="numeric">
             <button onclick="agregarInventario()">➕ Añadir al Catálogo</button>
         </div>
         <div class="panel">
-            <h2>📋 Catálogo Actual</h2>
+            <h2>📋 Catálogo y Stock Actual</h2>
             <div id="lista-inventario"></div>
-            <button onclick="resetearSistema()" class="btn-danger" style="background: transparent; border: 1px solid var(--danger); margin-top: 20px;">⚠️ Formatear Inventario</button>
         </div>
     </div>
 
@@ -179,25 +208,21 @@
     </div>
 
     <script>
-        // LÓGICA DE SEGURIDAD NUEVA
         function verificarClave() {
             const claveIntroducida = document.getElementById('input-clave').value;
             if (claveIntroducida === "Kiwi2026") {
-                // Si es correcta, oculta la pantalla negra suavemente
                 document.getElementById('pantalla-bloqueo').style.display = 'none';
             } else {
-                // Si falla, muestra el texto de error
                 document.getElementById('error-clave').style.display = 'block';
                 document.getElementById('input-clave').value = '';
             }
         }
 
-        // Permitir darle a "Enter" en el teclado para entrar
         document.getElementById('input-clave').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') { verificarClave(); }
         });
 
-        // --- RESTO DEL SISTEMA ---
+        // ESTRUCTURA DE DATOS
         let inventario = JSON.parse(localStorage.getItem('kiwi_inventario')) || [];
         let ventasHistorial = JSON.parse(localStorage.getItem('kiwi_ventas_historial')) || [];
         let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
@@ -257,15 +282,56 @@
             }
         }
 
+        // Se incluye el atributo descuento al crear
         function guardarProducto(n, p, s, foto) {
-            inventario.push({ id: inventario.length ? Math.max(...inventario.map(i => i.id)) + 1 : 1, nombre: n, precio: p, stock: s, imagen: foto });
+            inventario.push({ id: inventario.length ? Math.max(...inventario.map(i => i.id)) + 1 : 1, nombre: n, precio: p, stock: s, imagen: foto, descuento: 0 });
             document.getElementById('nuevo-nombre').value = ''; document.getElementById('nuevo-precio').value = ''; document.getElementById('nuevo-stock').value = ''; document.getElementById('nuevo-foto').value = '';
             guardarDatos(); actualizarUI();
-            alert("✅ Producto guardado correctamente.");
+            alert("✅ Producto añadido correctamente.");
+        }
+
+        // --- SISTEMA DE EDICIÓN ---
+        function abrirEdicion(id) {
+            const prod = inventario.find(p => p.id === id);
+            if(prod) {
+                document.getElementById('edit-id').value = prod.id;
+                document.getElementById('edit-nombre').value = prod.nombre;
+                document.getElementById('edit-precio').value = prod.precio;
+                document.getElementById('edit-stock').value = prod.stock;
+                document.getElementById('edit-descuento').value = prod.descuento || 0;
+                document.getElementById('modal-edicion').classList.add('activo');
+            }
+        }
+
+        function cerrarEdicion() {
+            document.getElementById('modal-edicion').classList.remove('activo');
+        }
+
+        function guardarEdicion() {
+            const id = parseInt(document.getElementById('edit-id').value);
+            const n = document.getElementById('edit-nombre').value;
+            const p = parseFloat(document.getElementById('edit-precio').value);
+            const s = parseInt(document.getElementById('edit-stock').value);
+            const d = parseInt(document.getElementById('edit-descuento').value) || 0;
+
+            if (!n || isNaN(p) || isNaN(s)) return alert("Revisa los datos introducidos.");
+
+            const index = inventario.findIndex(p => p.id === id);
+            if(index !== -1) {
+                inventario[index].nombre = n;
+                inventario[index].precio = p;
+                inventario[index].stock = s;
+                inventario[index].descuento = d;
+                
+                // Actualizar el carrito si el producto estaba dentro para evitar fallos de precio
+                carrito = carrito.filter(item => item.id !== id);
+                
+                guardarDatos(); actualizarUI(); cerrarEdicion();
+            }
         }
 
         function eliminarDelInventario(id) {
-            if(confirm("¿Eliminar este artículo del catálogo?")) {
+            if(confirm("¿Seguro que deseas ELIMINAR este artículo por completo del catálogo?")) {
                 inventario = inventario.filter(prod => prod.id !== id);
                 carrito = carrito.filter(item => item.id !== id);
                 guardarDatos(); actualizarUI();
@@ -276,8 +342,15 @@
             const prod = inventario.find(p => p.id === id);
             if (prod && prod.stock > 0) {
                 prod.stock--;
+                
+                // Calcular el precio real tras el descuento
+                const descuento = prod.descuento || 0;
+                const precioFinal = prod.precio * (1 - descuento/100);
+
                 const item = carrito.find(i => i.id === id);
-                if (item) item.cantidad++; else carrito.push({ ...prod, cantidad: 1 });
+                if (item) item.cantidad++; 
+                else carrito.push({ id: prod.id, nombre: prod.nombre, precio: precioFinal, descuentoInfo: descuento, cantidad: 1 });
+                
                 guardarDatos(); actualizarUI();
             }
         }
@@ -295,19 +368,66 @@
         function actualizarUI() {
             const divInv = document.getElementById('lista-inventario'); divInv.innerHTML = '';
             inventario.forEach(prod => { 
-                const imgTag = prod.imagen ? `<img src="${prod.imagen}" style="width: 40px; height: 40px; border-radius: 5px; object-fit: cover; margin-right: 10px;">` : '📦 ';
-                divInv.innerHTML += `<div class="item-lista"><div style="flex: 1; display:flex; align-items:center;">${imgTag}<div><strong style="color: var(--primary);">${prod.nombre}</strong><br><span style="color: var(--text-muted); font-size: 0.85rem;">${prod.precio.toFixed(2)}€ | Stock: ${prod.stock}</span></div></div><button onclick="eliminarDelInventario(${prod.id})" class="btn-danger" style="width: auto; padding: 10px; margin: 0; border-radius: 8px;">🗑️</button></div>`; 
+                const imgTag = prod.imagen ? `<img src="${prod.imagen}" style="width: 45px; height: 45px; border-radius: 5px; object-fit: cover; margin-right: 12px;">` : '📦 ';
+                const infoDescuento = (prod.descuento > 0) ? `<span style="color:var(--warning); font-size:0.8rem; font-weight:bold;">(-${prod.descuento}%)</span>` : '';
+                
+                divInv.innerHTML += `
+                <div class="item-lista">
+                    <div style="flex: 1; display:flex; align-items:center;">
+                        ${imgTag}
+                        <div>
+                            <strong style="color: var(--primary);">${prod.nombre} ${infoDescuento}</strong><br>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">${prod.precio.toFixed(2)}€ | Stock: <strong style="color:white;">${prod.stock}</strong></span>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="abrirEdicion(${prod.id})" style="background:var(--primary); padding:10px; width:40px; border-radius:8px; margin:0;">✏️</button>
+                        <button onclick="eliminarDelInventario(${prod.id})" class="btn-danger" style="padding:10px; width:40px; border-radius:8px; margin:0;">🗑️</button>
+                    </div>
+                </div>`; 
             });
 
             const divTPV = document.getElementById('lista-tpv'); divTPV.innerHTML = '';
             inventario.forEach(prod => { 
                 const ag = prod.stock === 0; 
                 const imgSrc = prod.imagen ? prod.imagen : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-                divTPV.innerHTML += `<div class="card-prod" style="${ag ? 'opacity:0.5; pointer-events:none;' : ''}" onclick="${ag ? '' : `agregarAlCarrito(${prod.id})`}"><img src="${imgSrc}" alt="${prod.nombre}"><div class="nombre">${prod.nombre}</div><div class="badge-precio">${ag ? 'AGOTADO' : prod.precio.toFixed(2) + '€'}</div></div>`; 
+                const desc = prod.descuento || 0;
+                
+                let precioHTML = `${prod.precio.toFixed(2)}€`;
+                let etiquetaOferta = '';
+                
+                if(desc > 0) {
+                    const precioNuevo = prod.precio * (1 - desc/100);
+                    precioHTML = `<del style="opacity:0.6; font-size:0.8em; margin-right:4px;">${prod.precio.toFixed(2)}€</del>${precioNuevo.toFixed(2)}€`;
+                    etiquetaOferta = `<div class="badge-oferta">-${desc}%</div>`;
+                }
+
+                divTPV.innerHTML += `
+                    <div class="card-prod" style="${ag ? 'opacity:0.5; pointer-events:none;' : ''}" onclick="${ag ? '' : `agregarAlCarrito(${prod.id})`}">
+                        ${etiquetaOferta}
+                        <img src="${imgSrc}" alt="${prod.nombre}">
+                        <div class="nombre">${prod.nombre}</div>
+                        <div class="badge-precio">${ag ? 'AGOTADO' : precioHTML}</div>
+                    </div>`; 
             });
 
+            // TICKET
             const divTick = document.getElementById('ticket-items'); divTick.innerHTML = ''; let t = 0;
-            carrito.forEach(item => { const sub = item.precio * item.cantidad; t += sub; divTick.innerHTML += `<div class="ticket-line" style="margin-top: 5px;"><span>${item.cantidad}x ${item.nombre}</span><span>${sub.toFixed(2)}€</span></div><div class="controles-cantidad" style="text-align: right; margin-bottom: 10px;" data-html2canvas-ignore><button onclick="quitarDelCarrito(${item.id})" class="btn-danger" style="background:var(--danger);">-</button><button onclick="agregarAlCarrito(${item.id})" style="background: var(--primary);">+</button></div>`; });
+            carrito.forEach(item => { 
+                const sub = item.precio * item.cantidad; 
+                t += sub; 
+                const marcaOferta = item.descuentoInfo > 0 ? `<span style="font-size:0.7em;"> (Oferta -${item.descuentoInfo}%)</span>` : '';
+                
+                divTick.innerHTML += `
+                    <div class="ticket-line" style="margin-top: 5px;">
+                        <span>${item.cantidad}x ${item.nombre}${marcaOferta}</span>
+                        <span>${sub.toFixed(2)}€</span>
+                    </div>
+                    <div class="controles-cantidad" style="text-align: right; margin-bottom: 10px;" data-html2canvas-ignore>
+                        <button onclick="quitarDelCarrito(${item.id})" class="btn-danger" style="background:var(--danger);">-</button>
+                        <button onclick="agregarAlCarrito(${item.id})" style="background: var(--primary);">+</button>
+                    </div>`; 
+            });
 
             document.getElementById('ticket-total-precio').innerText = t.toFixed(2);
             document.getElementById('ticket-id').innerText = String(numeroTicket).padStart(4, '0');
@@ -329,6 +449,7 @@
                 
                 const modal = document.getElementById('modal-ticket');
                 const imagenModal = document.getElementById('imagen-ticket-generado');
+                
                 imagenModal.src = imgDataUrl;
                 modal.classList.add('activo');
 
@@ -379,10 +500,6 @@
 
         function borrarHistorialVentas() {
             if(confirm("¿Seguro que quieres borrar el historial de ventas?")) { ventasHistorial = []; guardarDatos(); actualizarEstadisticas(); }
-        }
-
-        function resetearSistema() {
-            if(confirm("⚠️ ¿Formatear TODO el inventario?")) { inventario = []; carrito = []; numeroTicket = 1; guardarDatos(); actualizarUI(); }
         }
 
         actualizarUI();
