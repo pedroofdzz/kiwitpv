@@ -59,27 +59,42 @@
         .stat-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: center; }
         .stat-valor { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
 
-        /* ESTILOS DEL POP-UP Y EL BOTÓN DE DESCARGA */
-        .modal-fondo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-fondo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         .modal-fondo.activo { display: flex; }
-        .modal-mensaje { color: white; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; text-align: center; }
-        #imagen-ticket-generado { max-width: 85%; max-height: 55vh; border-radius: 5px; box-shadow: 0 0 20px rgba(255,255,255,0.2); margin-bottom: 20px; }
+        .modal-mensaje { color: var(--success); margin-bottom: 5px; font-size: 1.4rem; font-weight: bold; text-align: center; }
+        .modal-instruccion { color: white; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; font-size: 0.9rem; text-align: center; animation: parpadeo 2s infinite; }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
         
-        .btn-descargar-enlace { display: block; background: linear-gradient(135deg, var(--success), #059669); color: white; text-decoration: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; text-align: center; width: 80%; box-sizing: border-box; }
-        .btn-cerrar-modal { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 80%; padding: 12px; border-radius: 12px; }
+        #imagen-ticket-generado { max-width: 90%; max-height: 60vh; border-radius: 5px; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4); margin-bottom: 25px; border: 2px solid var(--primary); pointer-events: auto; user-select: none; -webkit-touch-callout: default; }
+        
+        .btn-cerrar-modal { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 80%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
+
+        /* NUEVO: ESTILOS PANTALLA DE BLOQUEO DE SEGURIDAD */
+        #pantalla-bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .caja-login { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .caja-login img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px; }
+        #error-clave { color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- POP-UP CON EL BOTÓN DE DESCARGA DIRECTO -->
+    <!-- PANTALLA DE BLOQUEO INICIAL -->
+    <div id="pantalla-bloqueo">
+        <div class="caja-login">
+            <img src="image_5ba85e.jpg" alt="Kiwi Logo">
+            <h2 style="border:none; padding:0; margin-bottom: 20px;">Acceso TPV</h2>
+            <input type="password" id="input-clave" placeholder="Introduce la contraseña" style="text-align: center; font-size: 1.2rem;">
+            <button onclick="verificarClave()" style="padding: 15px; font-size: 1.1rem;">Acceder al Sistema</button>
+            <div id="error-clave">Contraseña incorrecta</div>
+        </div>
+    </div>
+
+    <!-- POP-UP DEL TICKET -->
     <div id="modal-ticket" class="modal-fondo">
-        <div class="modal-mensaje">✅ Venta Registrada con Éxito</div>
+        <div class="modal-mensaje">✅ ¡Venta Registrada!</div>
+        <div class="modal-instruccion">👆 Mantén pulsado el ticket para guardarlo</div>
         <img id="imagen-ticket-generado" src="" alt="Tu Ticket Generado">
-        
-        <!-- ESTE ES EL BOTÓN MÁGICO QUE FORZA LA DESCARGA EN EL MÓVIL -->
-        <a id="boton-descargar-real" href="#" download="Ticket.png" class="btn-descargar-enlace">📥 Descargar Ticket</a>
-        
-        <button class="btn-cerrar-modal" onclick="cerrarModalTicket()">✖️ Cerrar y continuar</button>
+        <button class="btn-cerrar-modal" onclick="cerrarModalTicket()">✖️ Cerrar y atender al siguiente</button>
     </div>
 
     <!-- VISTA 1: TPV -->
@@ -164,14 +179,25 @@
     </div>
 
     <script>
-        // Bloqueo
-        const claveCorrecta = "Kiwi2026";
-        const intento = prompt("🔒 Área restringida. Introduce la contraseña del TPV:");
-        if (intento !== claveCorrecta) {
-            document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20vh;'>⛔ Acceso Denegado</h1>";
-            throw new Error("Bloqueado.");
+        // LÓGICA DE SEGURIDAD NUEVA
+        function verificarClave() {
+            const claveIntroducida = document.getElementById('input-clave').value;
+            if (claveIntroducida === "Kiwi2026") {
+                // Si es correcta, oculta la pantalla negra suavemente
+                document.getElementById('pantalla-bloqueo').style.display = 'none';
+            } else {
+                // Si falla, muestra el texto de error
+                document.getElementById('error-clave').style.display = 'block';
+                document.getElementById('input-clave').value = '';
+            }
         }
 
+        // Permitir darle a "Enter" en el teclado para entrar
+        document.getElementById('input-clave').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { verificarClave(); }
+        });
+
+        // --- RESTO DEL SISTEMA ---
         let inventario = JSON.parse(localStorage.getItem('kiwi_inventario')) || [];
         let ventasHistorial = JSON.parse(localStorage.getItem('kiwi_ventas_historial')) || [];
         let numeroTicket = parseInt(localStorage.getItem('kiwi_ticket')) || 1;
@@ -292,32 +318,20 @@
             if (carrito.length === 0) return alert("⚠️ El ticket está vacío.");
             
             const btn = document.querySelector('button[onclick="finalizarVenta()"]');
-            btn.innerText = "⏳ Procesando..."; btn.disabled = true;
+            btn.innerText = "⏳ Generando Ticket..."; btn.disabled = true;
 
-            // 1. Guardar la venta
             let totalVenta = 0;
             carrito.forEach(i => totalVenta += (i.precio * i.cantidad));
             ventasHistorial.push({ id: numeroTicket, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), total: totalVenta });
 
-            // 2. Dibujar la imagen del ticket
             html2canvas(document.getElementById('zona-ticket'), { backgroundColor: "#ffffff", scale: 2, useCORS: true }).then(canvas => {
                 const imgDataUrl = canvas.toDataURL("image/png");
-                const nombreArchivo = `Ticket_KiwiReview_${String(numeroTicket).padStart(4, '0')}.png`;
                 
-                // 3. Preparar el Pop-Up
                 const modal = document.getElementById('modal-ticket');
                 const imagenModal = document.getElementById('imagen-ticket-generado');
-                const botonDescargar = document.getElementById('boton-descargar-real');
-                
-                // Le pasamos la imagen generada tanto a la foto visible como al enlace del botón
                 imagenModal.src = imgDataUrl;
-                botonDescargar.href = imgDataUrl;
-                botonDescargar.download = nombreArchivo;
-                
-                // Mostramos la ventana
                 modal.classList.add('activo');
 
-                // 4. Limpiar el carrito de fondo
                 carrito = []; numeroTicket++; 
                 guardarDatos(); actualizarUI();
                 
