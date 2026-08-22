@@ -61,37 +61,38 @@
 
         #contenedor-ticket { display: flex; flex-direction: column; align-items: center; }
         
-        /* --- ESTILOS DEL TICKET MODIFICADOS (MÁS LARGO Y LOGO MÁS GRANDE) --- */
         .ticket-preview { 
             background: #ffffff !important; 
             padding: 20px; 
             padding-bottom: 30px; 
             width: 320px; 
             min-width: 320px; 
-            min-height: 550px; /* Fuerza el ticket a ser rectangular/alargado */
+            min-height: 550px; 
             font-family: monospace; 
             color: #000000 !important; 
             box-sizing: border-box; 
             display: flex; 
             flex-direction: column; 
         }
+        
+        /* LOGO MÁS GRANDE */
         .logo-ticket { 
-            width: 95px; /* Aumentado de 70px a 95px */
-            height: 95px; 
+            width: 130px; /* Aumentado a 130px para la máquina de impresión */
+            height: 130px; 
             border-radius: 50%; 
             object-fit: cover; 
             margin: 0 auto 15px auto; 
             display: block; 
             border: 2px dashed #000; 
         }
+        
         .ticket-footer-zona {
-            margin-top: auto; /* Empuja el QR hacia el final del papel */
+            margin-top: auto; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             padding-top: 30px;
         }
-        /* ------------------------------------------------------------------- */
 
         .ticket-header input { text-align: center; border: none; background: transparent; font-family: inherit; margin-bottom: 2px; width: 100%; color: #000; }
         .ticket-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; }
@@ -165,7 +166,6 @@
         <button class="btn-cerrar-modal" onclick="document.getElementById('modal-ticket').classList.remove('activo')">✖️ Cerrar</button>
     </div>
 
-    <!-- VISTAS -->
     <div id="vista-tpv" class="vista active">
         <div class="panel">
             <h2>🛒 Punto de Venta</h2>
@@ -175,7 +175,6 @@
         <div class="panel" id="contenedor-ticket">
             <h2 style="width: 100%;">🧾 Ticket en Curso</h2>
             
-            <!-- CONTENEDOR DEL TICKET (ESTRUCTURA ACTUALIZADA) -->
             <div id="zona-ticket" class="ticket-preview">
                 <div class="ticket-header" style="text-align: center; margin-bottom: 20px;">
                     <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
@@ -189,7 +188,6 @@
                 <div id="ticket-items"></div>
                 <div class="ticket-total">TOTAL: <span id="ticket-total-precio">0.00</span>€</div>
                 
-                <!-- ZONA INFERIOR CON FLEX-AUTO PARA HACER EL TICKET LARGO -->
                 <div class="ticket-footer-zona">
                     <div id="codigo-qr"></div>
                     <div style="text-align: center; font-size: 0.85rem; font-weight: bold; margin-top: 10px;">¡Síguenos en Instagram!</div>
