@@ -9,7 +9,6 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="image_5ba85e.jpg">
 
-    <!-- LIBRERÍAS (Añadidas Confetti y Tilt para el 3D) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,21 +16,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     
     <style>
-        /* TEMA POR DEFECTO (KIWI ORIGINAL) */
         :root { 
             --primary: #0ea5e9; --success: #10b981; --danger: #f43f5e; --warning: #f59e0b; 
             --text-main: #f8fafc; --text-muted: #94a3b8; --bg-panel: rgba(15, 23, 42, 0.85); 
             --bg-grad-1: #0f172a; --bg-grad-2: #1e1b4b; --bg-grad-3: #0c4a6e;
         }
-
-        /* TEMA CYBERPUNK */
         [data-theme="cyberpunk"] {
             --primary: #d946ef; --success: #eab308; --danger: #ef4444; --warning: #06b6d4; 
             --text-main: #ffffff; --text-muted: #a3a3a3; --bg-panel: rgba(20, 0, 20, 0.85); 
             --bg-grad-1: #2e1065; --bg-grad-2: #701a75; --bg-grad-3: #4a044e;
         }
-
-        /* TEMA HACKER (Ultra optimizado OLED) */
         [data-theme="hacker"] {
             --primary: #22c55e; --success: #22c55e; --danger: #ef4444; --warning: #eab308; 
             --text-main: #22c55e; --text-muted: #166534; --bg-panel: #000000; 
@@ -41,7 +35,6 @@
         body { font-family: system-ui, sans-serif; margin: 0; padding: 0; color: var(--text-main); background: linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3)); background-size: 200% 200%; animation: gradientBG 20s ease infinite; min-height: 100vh; padding-bottom: 70px; transition: background 0.5s ease; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        /* BOTÓN CAMBIO DE TEMA FLOTANTE */
         .btn-tema { position: fixed; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; z-index: 1000; cursor: pointer; backdrop-filter: blur(5px); }
         
         .panel { background: var(--bg-panel); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; margin: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: background 0.3s ease; }
@@ -58,7 +51,6 @@
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
         .grid-tpv { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; perspective: 1000px; }
-        /* TARJETA PREPARADA PARA 3D TILT */
         .card-prod { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; transform-style: preserve-3d; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .card-prod img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #000; transform: translateZ(20px); }
         .card-prod .nombre { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; height: 35px; overflow: hidden; line-height: 1.2; transform: translateZ(10px); }
@@ -68,11 +60,42 @@
         .controles-cantidad button { width: 35px; height: 35px; padding: 0; margin: 0 4px; border-radius: 8px; font-size: 1.1rem; }
 
         #contenedor-ticket { display: flex; flex-direction: column; align-items: center; }
-        .ticket-preview { background: #ffffff !important; padding: 20px; width: 320px; min-width: 320px; font-family: monospace; color: #000000 !important; box-sizing: border-box; }
-        .logo-ticket { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 0 auto 10px auto; display: block; border: 2px dashed #000; }
+        
+        /* --- ESTILOS DEL TICKET MODIFICADOS (MÁS LARGO Y LOGO MÁS GRANDE) --- */
+        .ticket-preview { 
+            background: #ffffff !important; 
+            padding: 20px; 
+            padding-bottom: 30px; 
+            width: 320px; 
+            min-width: 320px; 
+            min-height: 550px; /* Fuerza el ticket a ser rectangular/alargado */
+            font-family: monospace; 
+            color: #000000 !important; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .logo-ticket { 
+            width: 95px; /* Aumentado de 70px a 95px */
+            height: 95px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            margin: 0 auto 15px auto; 
+            display: block; 
+            border: 2px dashed #000; 
+        }
+        .ticket-footer-zona {
+            margin-top: auto; /* Empuja el QR hacia el final del papel */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 30px;
+        }
+        /* ------------------------------------------------------------------- */
+
         .ticket-header input { text-align: center; border: none; background: transparent; font-family: inherit; margin-bottom: 2px; width: 100%; color: #000; }
         .ticket-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; }
-        .ticket-total { font-size: 1.2rem; font-weight: 900; text-align: right; border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; }
+        .ticket-total { font-size: 1.2rem; font-weight: 900; text-align: right; border-top: 2px dashed #000; margin-top: 15px; padding-top: 10px; }
         
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000000; display: flex; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; padding: 15px 0; text-align: center; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: color 0.3s; }
@@ -104,7 +127,6 @@
 </head>
 <body data-theme="default">
 
-    <!-- BOTÓN PARA CAMBIAR EL TEMA (SKIN) -->
     <div class="btn-tema" onclick="cambiarTema()">🎨</div>
 
     <div id="pantalla-bloqueo">
@@ -117,7 +139,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDICIÓN -->
     <div id="modal-edicion" class="modal-fondo">
         <div class="caja-edicion">
             <h2 style="margin-bottom: 15px;">✏️ Editar Producto</h2>
@@ -137,7 +158,6 @@
         </div>
     </div>
 
-    <!-- MODAL TICKET GUARDADO -->
     <div id="modal-ticket" class="modal-fondo">
         <div class="modal-mensaje">✅ ¡Venta Registrada!</div>
         <div class="modal-instruccion">👆 Mantén pulsado el ticket para guardarlo</div>
@@ -154,6 +174,8 @@
 
         <div class="panel" id="contenedor-ticket">
             <h2 style="width: 100%;">🧾 Ticket en Curso</h2>
+            
+            <!-- CONTENEDOR DEL TICKET (ESTRUCTURA ACTUALIZADA) -->
             <div id="zona-ticket" class="ticket-preview">
                 <div class="ticket-header" style="text-align: center; margin-bottom: 20px;">
                     <img src="image_5ba85e.jpg" alt="Logo" class="logo-ticket">
@@ -163,13 +185,14 @@
                     <div style="font-size: 0.9rem; color: #444;" id="ticket-fecha"></div>
                 </div>
                 
-                <div style="border-bottom: 2px dashed #000; margin-bottom: 10px;"></div>
+                <div style="border-bottom: 2px dashed #000; margin-bottom: 15px;"></div>
                 <div id="ticket-items"></div>
                 <div class="ticket-total">TOTAL: <span id="ticket-total-precio">0.00</span>€</div>
                 
-                <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
+                <!-- ZONA INFERIOR CON FLEX-AUTO PARA HACER EL TICKET LARGO -->
+                <div class="ticket-footer-zona">
                     <div id="codigo-qr"></div>
-                    <div style="text-align: center; font-size: 0.85rem; font-weight: bold; margin-top: 8px;">¡Síguenos en Instagram!</div>
+                    <div style="text-align: center; font-size: 0.85rem; font-weight: bold; margin-top: 10px;">¡Síguenos en Instagram!</div>
                 </div>
             </div>
             
@@ -223,8 +246,6 @@
     </div>
 
     <script>
-        // --- SISTEMAS DE ENTRETENIMIENTO (FX) ---
-        // 1. Sonido de éxito generado por JavaScript (Sin archivos externos)
         function reproducirSonidoVenta() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -234,7 +255,6 @@
             osc.connect(gainNode);
             gainNode.connect(ctx.destination);
             
-            // Frecuencias para sonido tipo "Caja Registradora / Escáner"
             osc.type = 'sine';
             osc.frequency.setValueAtTime(800, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
@@ -246,7 +266,6 @@
             osc.stop(ctx.currentTime + 0.3);
         }
 
-        // 2. Tematización dinámica
         const temas = ['default', 'cyberpunk', 'hacker'];
         let indiceTemaActual = temas.indexOf(localStorage.getItem('kiwi_tema') || 'default');
         document.body.setAttribute('data-theme', temas[indiceTemaActual]);
@@ -255,10 +274,9 @@
             indiceTemaActual = (indiceTemaActual + 1) % temas.length;
             document.body.setAttribute('data-theme', temas[indiceTemaActual]);
             localStorage.setItem('kiwi_tema', temas[indiceTemaActual]);
-            actualizarEstadisticas(); // Redibuja la gráfica con los nuevos colores
+            actualizarEstadisticas(); 
         }
 
-        // --- SISTEMA TPV BASE ---
         function verificarClave() {
             if (document.getElementById('input-clave').value === "Kiwi2026") {
                 document.getElementById('pantalla-bloqueo').style.display = 'none';
@@ -295,7 +313,6 @@
             localStorage.setItem('kiwi_ventas_historial', JSON.stringify(ventasHistorial));
         }
 
-        // --- INVENTARIO ---
         function agregarInventario() {
             const inputFoto = document.getElementById('nuevo-foto');
             const n = document.getElementById('nuevo-nombre').value, p = parseFloat(document.getElementById('nuevo-precio').value), s = parseInt(document.getElementById('nuevo-stock').value);
@@ -357,7 +374,6 @@
                 const item = carrito.find(i => i.id === id);
                 if (item) item.cantidad++; else carrito.push({ id: prod.id, nombre: prod.nombre, precio: precioFinal, descInfo: prod.descuento||0, cantidad: 1 });
                 
-                // Efecto de sonido laser sutil al añadir
                 reproducirSonidoVenta();
                 guardarDatos(); actualizarUI();
             }
@@ -387,7 +403,6 @@
                 divTPV.innerHTML += `<div class="card-prod" style="${ag ? 'opacity:0.5; pointer-events:none;' : ''}" onclick="${ag ? '' : `agregarAlCarrito(${prod.id})`}">${etiq}<img src="${img}" alt="${prod.nombre}"><div class="nombre">${prod.nombre}</div><div class="badge-precio">${ag ? 'AGOTADO' : pH}</div></div>`; 
             });
 
-            // APLICAR EFECTO 3D HOLOGRÁFICO A LAS TARJETAS RECIÉN CREADAS
             VanillaTilt.init(document.querySelectorAll(".card-prod"), { max: 15, speed: 400, glare: true, "max-glare": 0.2, scale: 1.05 });
 
             const divTick = document.getElementById('ticket-items'); divTick.innerHTML = ''; let t = 0;
@@ -401,7 +416,6 @@
             const d = new Date(); document.getElementById('ticket-fecha').innerText = `${d.toLocaleDateString()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         }
 
-        // --- FINALIZAR VENTA CON CONFETI Y SONIDO ---
         function finalizarVenta() {
             if (carrito.length === 0) return alert("⚠️ El ticket está vacío.");
             const btn = document.querySelector('button[onclick="finalizarVenta()"]');
@@ -415,7 +429,6 @@
                 document.getElementById('imagen-ticket-generado').src = imgDataUrl;
                 document.getElementById('modal-ticket').classList.add('activo');
 
-                // 🎉 ¡EXPLOSIÓN DE CONFETI Y SONIDO DE ÉXITO!
                 reproducirSonidoVenta();
                 confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
 
@@ -440,10 +453,9 @@
             const ctx = document.getElementById('graficaVentas').getContext('2d');
             if(miGrafica != null) miGrafica.destroy();
             
-            // Adaptar color de gráfica según el tema
             let colorGrafica = '#0ea5e9'; 
-            if(indiceTemaActual === 1) colorGrafica = '#d946ef'; // Cyberpunk
-            if(indiceTemaActual === 2) colorGrafica = '#22c55e'; // Hacker
+            if(indiceTemaActual === 1) colorGrafica = '#d946ef'; 
+            if(indiceTemaActual === 2) colorGrafica = '#22c55e'; 
 
             const etiquetasDias = Object.keys(datosAgrupados).reverse().slice(-7);
             const valoresDinero = etiquetasDias.map(dia => datosAgrupados[dia]);
